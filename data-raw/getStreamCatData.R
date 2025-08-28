@@ -24,10 +24,7 @@
 #' @result Writes StreamCat_data_region.csv and StreamCat_stressor-info_region.csv
 #' to the local directory if the download is successful. If unsuccessful returns NULL.
 
-getStreamCatData <- function(localdir = "",
-                             dir_data = "",
-                             region = "",
-                             state = ""){
+getStreamCatData <- function(state = ""){
 
   library(tidyverse)
   library(usethis)
@@ -101,13 +98,30 @@ getStreamCatData <- function(localdir = "",
 
     buffer <- setdiff(NHD.STATE$comid, data_stressorWS$comid)
 
-    buffer_nni <- StreamCatTools::sc_get_data(metric = SCmetrics_nni,
-                                                aoi = 'watershed',
-                                                comid = buffer)
 
-    buffer_other <- StreamCatTools::sc_get_data(metric = SCmetrics_other,
-                                                  aoi = 'watershed',
-                                                  comid = buffer)
+    # TODO throttling server implement as loop
+    buffer_nni <- NULL
+    buffer_other <- NULL
+
+    for(k in 1:ceiling(length(buffer)/500)){
+      start_ind <- ((k-1)*500) + 1
+      end_ind <- 500 * k
+      print(paste0("downloading buffer ", start_ind, ":", end_ind))
+
+      temp_buffer <- buffer[start_ind:end_ind]
+
+      temp_nni <- StreamCatTools::sc_get_data(metric = SCmetrics_nni,
+                                              aoi = 'watershed',
+                                              comid = temp_buffer)
+      temp_other <- StreamCatTools::sc_get_data(metric = SCmetrics_other,
+                                                aoi = 'watershed',
+                                                comid = temp_buffer)
+
+      buffer_nni <- buffer_nni %>% bind_rows(temp_nni)
+      buffer_other <- buffer_other %>% bind_rows(temp_other)
+    }
+
+
     buffer_WS <- dplyr::full_join(buffer_nni, buffer_other, by = "comid")
 
     data_stressorWS <- data_stressorWS %>%
