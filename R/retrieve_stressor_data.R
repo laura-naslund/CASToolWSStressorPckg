@@ -13,14 +13,14 @@ retrieve_stressor_data <- function(State){
   files <- data(package = "CASToolWSStressorPckg", verbose = FALSE)$results[,3] %>%
     stringr::str_subset(paste0(stateAbb, "_"))
 
-  ret_data <- NULL
+  # Use pblapply for parallel processing with progress bar
+  ret_data_list <- pblapply(files, function(file) {
+    data(list = file, package = "CASToolWSStressorPckg", envir = environment())
+    get(file, envir = environment())
+  })
 
-  for(i in 1:length(files)){
-    data(list = files[i], package = "CASToolWSStressorPckg", envir = environment())
-    temp_data <- get(files[i], envir = environment())
-
-    ret_data <- ret_data %>% bind_rows(temp_data)
-  }
+  # Bind rows of all data frames in the list
+  ret_data <- bind_rows(ret_data_list)
 
   return(ret_data)
 
