@@ -2,3 +2,4 @@
 
 export(retrieve_stressor_data)
 export(retrieve_stressor_info)
+importFrom(magrittr,"%>%")
