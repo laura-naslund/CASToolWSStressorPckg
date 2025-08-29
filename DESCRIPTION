@@ -13,5 +13,7 @@ Depends:
     R (>= 3.5)
 LazyData: true
 Imports: 
+    dplyr,
     magrittr,
+    pbapply,
     stringr
