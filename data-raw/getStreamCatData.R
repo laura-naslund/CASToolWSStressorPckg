@@ -17,7 +17,7 @@
 #'
 #' @param localdir Directory containing CASTool metadata
 #' @param dir_results Directory containing cluster data
-#' @param state Two letter state abbreviation of region of interest
+#' @param state State name
 #'
 #' Will need to change this function if extrapolating to a region beyond a state
 #'
